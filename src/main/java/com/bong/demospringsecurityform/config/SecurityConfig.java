@@ -21,7 +21,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
-        .mvcMatchers("/", "/info", "/account/**").permitAll()
+        .mvcMatchers("/", "/info", "/account/**", "/signup").permitAll()
         .mvcMatchers("/admin").hasRole("ADMIN")
         .mvcMatchers("/users").hasRole("USER")
         .anyRequest().authenticated()
@@ -32,6 +32,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .httpBasic();
 
     SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+
+    http.logout()
+        .logoutUrl("/my/logout")
+        .logoutSuccessUrl("/")
+//        .logoutRequestMatcher()
+        .invalidateHttpSession(true)
+        .deleteCookies()
+//        .addLogoutHandler()
+//        .logoutSuccessHandler()
+    ;
+
+    http.formLogin()
+        .usernameParameter("my-username")
+        .passwordParameter("my-password")
+        .loginProcessingUrl("/my-login")
+        .loginPage("/signin").permitAll();
   }
 
   private DefaultWebSecurityExpressionHandler expressionHandler() {
