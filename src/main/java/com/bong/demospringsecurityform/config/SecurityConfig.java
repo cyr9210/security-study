@@ -1,5 +1,6 @@
 package com.bong.demospringsecurityform.config;
 
+import com.bong.demospringsecurityform.common.LoggingFilter;
 import com.bong.demospringsecurityform.domain.Account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -48,6 +51,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .passwordParameter("my-password")
         .loginProcessingUrl("/my-login")
         .loginPage("/signin").permitAll();
+
+//    http.sessionManagement()
+//          .sessionFixation()
+//            .none()
+//          .invalidSessionUrl("/")
+//          .maximumSessions(1)
+//            .maxSessionsPreventsLogin(false)
+//            .expiredUrl("/").and()
+//          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+    http.exceptionHandling()
+//        .accessDeniedPage("/access-denied")
+        .accessDeniedHandler((request, response, accessDeniedException) -> {
+          UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+          String username = principal.getUsername();
+          System.out.println(username + " is denied to access " + request.getRequestURI());
+          response.sendRedirect("/access-denied");
+        });
+
+    http.addFilterBefore(new LoggingFilter(), WebAsyncManagerIntegrationFilter.class);
   }
 
   private DefaultWebSecurityExpressionHandler expressionHandler() {
