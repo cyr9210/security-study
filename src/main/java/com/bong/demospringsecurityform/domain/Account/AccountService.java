@@ -2,7 +2,6 @@ package com.bong.demospringsecurityform.domain.Account;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,11 +22,7 @@ public class AccountService implements UserDetailsService {
     Optional<Account> byUsername = accountRepository.findByUsername(username);
     Account account = byUsername.orElseThrow(() -> new UsernameNotFoundException(String.format("%s is not founded!", username)));
 
-    return User.builder()
-        .username(account.getUsername())
-        .password(account.getPassword())
-        .roles(account.getRole())
-        .build();
+    return new UserAccount(account);
   }
 
   public Account create(Account account) {
